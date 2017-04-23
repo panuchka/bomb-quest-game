@@ -11,7 +11,7 @@ export default class GameScene extends Scene {
   constructor(canvas, engine) {
     super(canvas, engine);
 
-    //this.scene.debugLayer.show();
+    this.scene.debugLayer.show();
 
     /* Gravity and collisions */
     this.scene.gravity = new Babylon.Vector3(0, -1, 0);
@@ -39,17 +39,20 @@ export default class GameScene extends Scene {
 
     /* Init assets */
     this.loadedAssets = {};
-    this.assets = ['game'];
+    this.meshes = ['game'];
+    this.textures = [];
 
     new PreLoader(this)
-     .loadAssets(this.assets)
+     .loadAssets(this.meshes, this.textures)
      .onFinish(this.initScene, this);
   }
 
   initScene() {
     try {
       this.stageManager = new StageManager(this);
-      this.stage = this.stageManager.createStage('basic-1');
+      this.stage = _.sample([0,1])
+        ? this.stageManager.createStage('basic-1')
+        : this.stageManager.createStage();
       this.stage.spawnActors();
 
       /* Init player */

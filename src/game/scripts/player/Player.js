@@ -12,8 +12,8 @@ export default class Player {
     this.body.position.z = 100;
 
     const bounds = this.body.getBoundingInfo().boundingBox.extendSize;
-    this.body.ellipsoid = new Babylon.Vector3(bounds.x/2, bounds.x/4, bounds.x/2);
-    this.body.ellipsoidOffset = new Babylon.Vector3(0, bounds.x/2, 0);
+    this.body.ellipsoid = new Babylon.Vector3(bounds.x / 2, bounds.x / 4, bounds.x / 2);
+    this.body.ellipsoidOffset = new Babylon.Vector3(0, bounds.x / 2, 0);
     this.body.checkCollisions = true;
     this.body.applyGravity = true;
     this.body.visibility = true;
@@ -22,7 +22,7 @@ export default class Player {
     this.nextSpeed = new Babylon.Vector3(0, 0, 0);
     this.nextTorch = new Babylon.Vector3(0, 0, 0);
 
-    this.movementDirection = [0,0,0,0];
+    this.movementDirection = [0, 0, 0, 0];
 
     game.scene.registerBeforeRender(() => {
       this.move();
@@ -44,42 +44,42 @@ export default class Player {
 
   rotate() {
     if (this.currentSpeed.x > 0.1 || this.currentSpeed.z > 0.1 || this.currentSpeed.x < -0.1 || this.currentSpeed.z < -0.1) {
-			var v1 = new Babylon.Vector2(0,-1);
-			var v2 = new Babylon.Vector2(this.currentSpeed.x, this.currentSpeed.z);
+      var v1 = new Babylon.Vector2(0, -1);
+      var v2 = new Babylon.Vector2(this.currentSpeed.x, this.currentSpeed.z);
 
-			var angle = -Math.acos(Babylon.Vector2.Dot(v1, v2.normalize()));
+      var angle = -Math.acos(Babylon.Vector2.Dot(v1, v2.normalize()));
 
-			if (!isNaN(angle)) {
-				if (this.currentSpeed.x < 0) angle = angle * -1;
+      if (!isNaN(angle)) {
+        if (this.currentSpeed.x < 0) angle = angle * -1;
 
-				// calculate both angles in degrees
-				var angleDegrees = Math.round(angle * 180 / Math.PI);
-				var playerRotationDegrees = Math.round(this.body.rotation.y * 180 / Math.PI);
+        // calculate both angles in degrees
+        var angleDegrees = Math.round(angle * 180 / Math.PI);
+        var playerRotationDegrees = Math.round(this.body.rotation.y * 180 / Math.PI);
 
-				// calculate the delta
-				var deltaDegrees = playerRotationDegrees - angleDegrees;
+        // calculate the delta
+        var deltaDegrees = playerRotationDegrees - angleDegrees;
 
-				// check what direction to turn to take the shortest turn
-				if (deltaDegrees > 180) {
-					deltaDegrees = deltaDegrees - 360;
-				} else if (deltaDegrees < -180) {
-					deltaDegrees = deltaDegrees + 360;
-				}
+        // check what direction to turn to take the shortest turn
+        if (deltaDegrees > 180) {
+          deltaDegrees = deltaDegrees - 360;
+        } else if (deltaDegrees < -180) {
+          deltaDegrees = deltaDegrees + 360;
+        }
 
-				var rotationSpeed = Math.round(Math.abs(deltaDegrees) / 8);
-				if (deltaDegrees > 0) {
-					this.body.rotation.y -= rotationSpeed * Math.PI / 180;
-					if (this.body.rotation.y < -Math.PI) {
-						this.body.rotation.y = Math.PI;
-					}
-				}
-				if (deltaDegrees < 0) {
-					this.body.rotation.y += rotationSpeed * Math.PI / 180;
-					if (this.body.rotation.y > Math.PI) {
-						this.body.rotation.y = -Math.PI;
-					}
-				}
-			}
+        var rotationSpeed = Math.round(Math.abs(deltaDegrees) / 8);
+        if (deltaDegrees > 0) {
+          this.body.rotation.y -= rotationSpeed * Math.PI / 180;
+          if (this.body.rotation.y < -Math.PI) {
+            this.body.rotation.y = Math.PI;
+          }
+        }
+        if (deltaDegrees < 0) {
+          this.body.rotation.y += rotationSpeed * Math.PI / 180;
+          if (this.body.rotation.y > Math.PI) {
+            this.body.rotation.y = -Math.PI;
+          }
+        }
+      }
     }
   }
 
@@ -109,20 +109,20 @@ export default class Player {
 
   handleKeyUp(keycode) {
     switch (keycode) {
-      case CONTROLS.ZQSD.TOP :
-      case CONTROLS.QWSD.TOP :
-        this.chooseDirection(2,0);
+      case CONTROLS.ZQSD.TOP:
+      case CONTROLS.QWSD.TOP:
+        this.chooseDirection(2, 0);
         break;
-      case CONTROLS.ZQSD.BOT :
-      case CONTROLS.QWSD.BOT :
+      case CONTROLS.ZQSD.BOT:
+      case CONTROLS.QWSD.BOT:
         this.chooseDirection(3, 0);
         break;
       case CONTROLS.ZQSD.LEFT:
-      case CONTROLS.QWSD.LEFT :
+      case CONTROLS.QWSD.LEFT:
         this.chooseDirection(1, 0);
         break;
       case CONTROLS.ZQSD.RIGHT:
-      case CONTROLS.QWSD.RIGHT :
+      case CONTROLS.QWSD.RIGHT:
         this.chooseDirection(0, 0);
         break;
       case CONTROLS.WEAPON:
@@ -132,20 +132,20 @@ export default class Player {
 
   handleKeyDown(keycode) {
     switch (keycode) {
-      case CONTROLS.ZQSD.TOP :
-      case CONTROLS.QWSD.TOP :
+      case CONTROLS.ZQSD.TOP:
+      case CONTROLS.QWSD.TOP:
         this.chooseDirection(2, 1);
         break;
-      case CONTROLS.ZQSD.BOT :
-      case CONTROLS.QWSD.BOT :
+      case CONTROLS.ZQSD.BOT:
+      case CONTROLS.QWSD.BOT:
         this.chooseDirection(3, 1);
         break;
       case CONTROLS.ZQSD.LEFT:
-      case CONTROLS.QWSD.LEFT :
+      case CONTROLS.QWSD.LEFT:
         this.chooseDirection(1, 1);
         break;
       case CONTROLS.ZQSD.RIGHT:
-      case CONTROLS.QWSD.RIGHT :
+      case CONTROLS.QWSD.RIGHT:
         this.chooseDirection(0, 1);
         break;
     };

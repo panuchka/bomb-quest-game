@@ -61,7 +61,6 @@ export default class Stage {
         if (col.floor === 1) {
           const floorMeshCopy = floorMesh.createInstance('Floor');
           floorMeshCopy.position = new Babylon.Vector3(x * this.tileSize + (this.tileSize/2), 0, y * this.tileSize + (this.tileSize/2));
-          //floorMeshCopy.rotation = new Babylon.Vector3(Math.PI/2, 0, 0);
           floorMeshCopy.checkCollisions = true;
           floorMeshCopy.modelPosition = {x, y};
           col.floorMesh = floorMeshCopy;
@@ -72,6 +71,7 @@ export default class Stage {
           const obstacleMeshCopy = obstacleMesh.createInstance('Obstacle');
           obstacleMeshCopy.position = new Babylon.Vector3(x * this.tileSize + (this.tileSize/2), 0, y * this.tileSize + (this.tileSize/2));
           obstacleMeshCopy.checkCollisions = true;
+          obstacleMeshCopy.rotation = new Babylon.Vector3(0, _.sample([0, (Math.PI/2), (-Math.PI/2), Math.PI]), 0);
           col.obstacleMesh = obstacleMeshCopy;
           col.obstacleMesh.parent = group;
         }
@@ -280,7 +280,7 @@ export default class Stage {
   }
 
   spawnTreasure(location) {
-    new Treasure(this.game, this.game.loadedAssets['Item_Bomb'], location);
+    new Treasure(this.game, this.game.loadedAssets['Collectable_Scrap'], location);
   }
 
   destroyTiles(explosionPosition) {
@@ -299,7 +299,7 @@ export default class Stage {
               if (_.sample([0,0,0,0,1]) === 1) {
                 this.spawnTreasure(new Babylon.Vector3(
                   this.spaceBetweenStages + this.tileSize*(mx+x) + (this.tileSize/2), 
-                  0, 
+                  10,
                   this.spaceBetweenStages + this.tileSize*(my+y) + (this.tileSize/2)));
               }
             }
