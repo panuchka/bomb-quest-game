@@ -21,7 +21,7 @@
   },
   "scripts": {
     "start": "webpack-dev-server --content-base src --inline --hot",
-    "build": "webpack --progress --colors --watch",
+    "build": "webpack --progress --colors",
     "prod": "PROD_ENV=1 webpack --progress --colors --watch"
   }
 }
