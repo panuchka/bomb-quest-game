@@ -18,6 +18,8 @@ export default class Player {
     this.body.applyGravity = true;
     this.body.visibility = true;
 
+    this.game.shadowGenerator.getShadowMap().renderList.push(this.body);
+
     this.currentSpeed = new Babylon.Vector3(0, 0, 0);
     this.nextSpeed = new Babylon.Vector3(0, 0, 0);
     this.nextTorch = new Babylon.Vector3(0, 0, 0);
