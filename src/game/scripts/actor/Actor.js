@@ -3,10 +3,12 @@ import _ from 'lodash'
 
 export default class Actor {
   constructor(game, model, position) {
+    this.game = game;
     this.body = game.loadedAssets['Entity_Hazmat'].createInstance('Entity_Hazmat-1');
     this.body.setEnabled(true);
     this.body.position = new Babylon.Vector3(position.x, 0, position.y);
     //this.body.checkCollisions = true;
+    this.game.shadowGenerator.getShadowMap().renderList.push(this.body);
 
     this.scene = game.scene;
     this.stage = game.stage;

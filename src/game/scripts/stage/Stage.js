@@ -26,6 +26,9 @@ export default class Stage {
   }
 
   createStage() {
+    const group = new Babylon.Mesh.CreateBox(this.model.name, 1, this.game.scene);
+    group.isVisible = false;
+
     const floorMesh = this.game.loadedAssets['Tile_Floor'];
     floorMesh.receiveShadows = true;
     floorMesh.checkCollisions = true;
@@ -41,8 +44,13 @@ export default class Stage {
     const rotorFan = this.game.loadedAssets['Machine_Propeller'];
     rotorFan.receiveShadows = true;
 
-    const group = new Babylon.Mesh.CreateBox(this.model.name, 1, this.game.scene);
-    group.isVisible = false;
+    const skybox = this.game.loadedAssets['Skybox'];
+    skybox.receiveShadows = false;
+
+    const skyBoxMeshCopy = skybox.createInstance('Skybox');
+    skyBoxMeshCopy.parent = group;
+    skyBoxMeshCopy.position = new Babylon.Vector3(0, 0, 0);
+    this.game.scene.actionManager.registerAction(new Babylon.IncrementValueAction(Babylon.ActionManager.OnEveryFrameTrigger, skyBoxMeshCopy, "rotation.y", 0.0005));
 
     const findRotorDirection = (x, y) => {
       const tiles = [this.model.tiles[x-1] ? this.model.tiles[x][y] : undefined,
@@ -65,6 +73,8 @@ export default class Stage {
           floorMeshCopy.modelPosition = {x, y};
           col.floorMesh = floorMeshCopy;
           col.floorMesh.parent = group;
+
+          this.game.shadowGenerator.getShadowMap().renderList.push(floorMeshCopy);
         }
 
         if (col.obstacle === 1) {
@@ -74,6 +84,8 @@ export default class Stage {
           obstacleMeshCopy.rotation = new Babylon.Vector3(0, _.sample([0, (Math.PI/2), (-Math.PI/2), Math.PI]), 0);
           col.obstacleMesh = obstacleMeshCopy;
           col.obstacleMesh.parent = group;
+
+          this.game.shadowGenerator.getShadowMap().renderList.push(obstacleMeshCopy);
         }
 
         if (col.rotor === 1 && col.floor === 1) {
@@ -113,6 +125,7 @@ export default class Stage {
       });
     });
 
+    this.model.skybox = skyBoxMeshCopy;
     this.model.group = group;
     this.model.group.position.z = this.spaceBetweenStages;
 

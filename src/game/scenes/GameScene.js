@@ -21,19 +21,10 @@ export default class GameScene extends Scene {
     this.scene.fogMode = Babylon.Scene.FOGMODE_EXP;
     this.scene.fogColor = new Babylon.Color3(0.9, 0.9, 0.85);
     this.scene.fogDensity = 0.0001;
-    
-    /* Skybox */
-    const skyboxMaterial = new Babylon.StandardMaterial('skybox', this.scene);
-    skyboxMaterial.backFaceCulling = false;
-    skyboxMaterial.disableLighting = true;
-    skyboxMaterial.diffuseColor = new Babylon.Color3(0,0,0);
-    skyboxMaterial.specularColor = new Babylon.Color3(0,0,0);
-    skyboxMaterial.reflectionTexture = new Babylon.CubeTexture('http://babylonjs-playground.azurewebsites.net/textures/skybox', this.scene);
-    skyboxMaterial.reflectionTexture.coordinatesMode = Babylon.Texture.SKYBOX_MODE;
 
-    const skybox = new Babylon.Mesh.CreateBox("skybox", 10000.0, this.scene);
-    skybox.material = skyboxMaterial;
-    skybox.infiniteDistance = true;
+    /* Shadows */
+    this.shadowGenerator = new Babylon.ShadowGenerator(1024, this.directionalLight);
+    this.shadowGenerator.useBlurExponentialShadowMap = true;
 
     this.scene.actionManager = new Babylon.ActionManager(this.scene);
 
