@@ -69,6 +69,7 @@ export default class Stage {
         if (col.floor === 1) {
           const floorMeshCopy = floorMesh.createInstance('Floor');
           floorMeshCopy.position = new Babylon.Vector3(x * this.tileSize + (this.tileSize/2), 0, y * this.tileSize + (this.tileSize/2));
+          floorMeshCopy.rotation = new Babylon.Vector3(0, _.sample([0, (Math.PI/2), (-Math.PI/2), Math.PI]), 0);
           floorMeshCopy.checkCollisions = true;
           floorMeshCopy.modelPosition = {x, y};
           col.floorMesh = floorMeshCopy;
