@@ -33,7 +33,6 @@ export default class Bomb {
 
     if (result.hit && result.pickedMesh.modelPosition) {
       this.game.stage.destroyTiles(result.pickedMesh.modelPosition);
-      this.game.stage.buildNavigationMesh(this.game.scene);
     }
 
     this.body.dispose();

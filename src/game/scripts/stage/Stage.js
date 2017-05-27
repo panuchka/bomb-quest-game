@@ -22,7 +22,10 @@ export default class Stage {
     this.spaceBetweenStages = spaceBetweenStages * stageIndex;
 
     this.createStage();
-    this.buildNavigationMesh(this.game.scene);
+
+    if (this.model.actors.length > 0) {
+      this.buildNavigationMesh(this.game.scene);
+    }
   }
 
   createStage() {
@@ -44,13 +47,68 @@ export default class Stage {
     const rotorFan = this.game.loadedAssets['Machine_Propeller'];
     rotorFan.receiveShadows = true;
 
+    const teleporter = this.game.loadedAssets['Teleport'];
+    const teleporterStart = teleporter.createInstance('TeleporterStart')
+    teleporterStart.position = new Babylon.Vector3(
+      this.model.start.x * this.tileSize,
+      0,
+      this.model.start.y * this.tileSize)
+    teleporterStart.rotation.y = Math.floor(Math.random() * 360) + 1
+    teleporterStart.parent = group;
+
+    const teleporterEnd = teleporter.createInstance('TeleporterEnd')
+    teleporterEnd.position = new Babylon.Vector3(
+      this.model.end.x * this.tileSize,
+      0,
+      this.model.end.y * this.tileSize)
+    teleporterEnd.rotation.y = Math.floor(Math.random() * 360) + 1
+    teleporterEnd.parent = group;
+
+    const teleporterRing = this.game.loadedAssets['teleport_wheel']
+
+    const teleporterStartRing = teleporterRing.clone('TeleporterStartRing')
+    teleporterStartRing.material = new Babylon.StandardMaterial('TeleporterRingMaterial', this.game.scene)
+    teleporterStartRing.material.diffuseColor = new Babylon.Color3(1, 0, 0);
+    teleporterStartRing.position = new Babylon.Vector3(
+      this.model.start.x * this.tileSize,
+      0,
+      this.model.start.y * this.tileSize
+    )
+    teleporterStartRing.parent = group
+
+    const teleporterEndRing = teleporterRing.clone('TeleporterEndRing')
+    teleporterEndRing.material = new Babylon.StandardMaterial('TeleporterRingMaterial', this.game.scene)
+    teleporterEndRing.material.diffuseColor = new Babylon.Color3(0, 1, 0);
+    teleporterEndRing.position = new Babylon.Vector3(
+      this.model.end.x * this.tileSize,
+      0,
+      this.model.end.y * this.tileSize
+    )
+    teleporterEndRing.parent = group
+
+    this.render = this.game.scene.onBeforeRenderObservable.add(() => {
+      if (teleporterEnd.intersectsMesh(this.game.player.body, true)) {
+        this.game.changeStage()
+      }
+    });
+
     const skybox = this.game.loadedAssets['Skybox'];
     skybox.receiveShadows = false;
 
     const skyBoxMeshCopy = skybox.createInstance('Skybox');
     skyBoxMeshCopy.parent = group;
-    skyBoxMeshCopy.position = new Babylon.Vector3(0, 0, 0);
+    skyBoxMeshCopy.position = new Babylon.Vector3(0, -400, 0);
     this.game.scene.actionManager.registerAction(new Babylon.IncrementValueAction(Babylon.ActionManager.OnEveryFrameTrigger, skyBoxMeshCopy, "rotation.y", 0.0005));
+
+    const clouds = this.game.loadedAssets['skubox_secondlayer']
+    clouds.receiveShadows = false
+    clouds.material.opacityTexture.getAlphaFromRGB = true;
+    clouds.material.useSpecularOverAlpha = false
+
+    const cloudsMeshCopy = clouds.createInstance('Clouds')
+    cloudsMeshCopy.parent = group;
+    cloudsMeshCopy.position = new Babylon.Vector3(0, -400, 0);
+    this.game.scene.actionManager.registerAction(new Babylon.IncrementValueAction(Babylon.ActionManager.OnEveryFrameTrigger, cloudsMeshCopy, "rotation.y", 0.0010));
 
     const findRotorDirection = (x, y) => {
       const tiles = [this.model.tiles[x-1] ? this.model.tiles[x][y] : undefined,
@@ -93,14 +151,14 @@ export default class Stage {
           const rotorLocation = findRotorDirection(x, y);
           const offset = 20;
           const rotorOffset = 20;
-          
+
           if (rotorLocation) {
             const rotorBaseMeshCopy = rotorBase.createInstance('RotorBase');
             rotorBaseMeshCopy.rotation.y = rotorLocation.rotation;
             rotorBaseMeshCopy.checkCollisions = true;
             rotorBaseMeshCopy.position = new Babylon.Vector3(
-              x * this.tileSize + (this.tileSize/2) + (rotorLocation.x * (this.tileSize-offset)), 
-              0, 
+              x * this.tileSize + (this.tileSize/2) + (rotorLocation.x * (this.tileSize-offset)),
+              0,
               y * this.tileSize + (this.tileSize/2) + (rotorLocation.y * (this.tileSize-offset)));
             rotorBaseMeshCopy.setEnabled(true);
             col.rotorBaseMesh = rotorBaseMeshCopy;
@@ -108,8 +166,8 @@ export default class Stage {
 
             const rotorFanMeshCopy = rotorFan.createInstance('RotorFan');
             rotorFanMeshCopy.position = new Babylon.Vector3(
-              x * this.tileSize + (this.tileSize/2) + (rotorLocation.x * (this.tileSize + rotorOffset)), 
-              0, 
+              x * this.tileSize + (this.tileSize/2) + (rotorLocation.x * (this.tileSize + rotorOffset)),
+              0,
               y * this.tileSize + (this.tileSize/2) + (rotorLocation.y * (this.tileSize + rotorOffset)));
             rotorFanMeshCopy.setEnabled(true);
             this.game.scene.actionManager.registerAction(new Babylon.IncrementValueAction(Babylon.ActionManager.OnEveryFrameTrigger, rotorFanMeshCopy, "rotation.y", 0.2));
@@ -150,13 +208,17 @@ export default class Stage {
           .value();
       })
       .value();
-    
+
     return {
       name: _.sample(this.generatorOptions.namePool),
       tiles: tiles,
       start: {
         x: 1,
         y: 1
+      },
+      end: {
+        x: 5,
+        y: 5
       },
       actors: []
     };
@@ -181,6 +243,7 @@ export default class Stage {
         });
       }),
       start: model.start,
+      end: model.end,
       actors: model.actors
     };
   }
@@ -207,51 +270,51 @@ export default class Stage {
       positions.push(vector3.z);
     }
 
-    function vector3(x, y, tileSize) {
+    function vector3(x, y, tileSize, space) {
       return {
         x: x * tileSize,
         y: 0,
-        z: y * tileSize
+        z: y * tileSize + space
       };
     }
 
     for (let x = 0; x < height; x++) {
       for (let y = 0; y < width; y++) {
         if (this.model.tiles[x][y].floor === 0 || this.model.tiles[x][y].obstacle === 1) continue;
-        
-        let northLeft = vector3(x+0.333, y+1, this.tileSize);
-        let northRight = vector3(x+0.666, y+1, this.tileSize);
-        let westBottom = vector3(x, y+0.333, this.tileSize);
-        let westTop = vector3(x, y+0.666, this.tileSize);
-        let eastBottom = vector3(x+1, y+0.333, this.tileSize);
-        let eastTop = vector3(x+1, y+0.666, this.tileSize);
-        let southLeft = vector3(x+0.333, y, this.tileSize);
-        let southRight = vector3(x+0.666, y, this.tileSize);
-        
-        addVector3(southLeft);            
+
+        let northLeft = vector3(x+0.333, y+1, this.tileSize, this.spaceBetweenStages);
+        let northRight = vector3(x+0.666, y+1, this.tileSize, this.spaceBetweenStages);
+        let westBottom = vector3(x, y+0.333, this.tileSize, this.spaceBetweenStages);
+        let westTop = vector3(x, y+0.666, this.tileSize, this.spaceBetweenStages);
+        let eastBottom = vector3(x+1, y+0.333, this.tileSize, this.spaceBetweenStages);
+        let eastTop = vector3(x+1, y+0.666, this.tileSize, this.spaceBetweenStages);
+        let southLeft = vector3(x+0.333, y, this.tileSize, this.spaceBetweenStages);
+        let southRight = vector3(x+0.666, y, this.tileSize, this.spaceBetweenStages);
+
+        addVector3(southLeft);
         addVector3(westTop);
         addVector3(westBottom);
 
-        addVector3(southLeft);            
+        addVector3(southLeft);
         addVector3(northLeft);
         addVector3(westTop);
 
-        addVector3(southLeft);            
+        addVector3(southLeft);
         addVector3(northRight);
         addVector3(northLeft);
 
-        addVector3(southLeft);            
+        addVector3(southLeft);
         addVector3(eastTop);
         addVector3(northRight);
 
-        addVector3(southLeft);            
+        addVector3(southLeft);
         addVector3(eastBottom);
         addVector3(eastTop);
 
-        addVector3(southLeft);            
+        addVector3(southLeft);
         addVector3(southRight);
         addVector3(eastBottom);
-        
+
         for (let i = 0; i < 18; i++) {
           indices[index + i] = index + i;
         }
@@ -284,11 +347,19 @@ export default class Stage {
     return this.navigation.findPath(start, end, model.name, group) || [];
   }
 
+  spawnPlayer() {
+    this.game.player.body.position = new Babylon.Vector3(
+      this.model.start.x * this.tileSize + 1,
+      0,
+      this.spaceBetweenStages + this.model.start.y * this.tileSize + 1
+    )
+  }
+
   spawnActors() {
     this.actors = _.map(this.model.actors, (actor) => {
       return new Guardian(this.game, this.model, {
-        x: (actor.x * this.tileSize) - this.tileSize/2, 
-        y: (actor.y * this.tileSize) - this.tileSize/2
+        x: (actor.x * this.tileSize) - this.tileSize/2,
+        y: this.spaceBetweenStages + (actor.y * this.tileSize) - this.tileSize/2
       });
     });
   }
@@ -312,7 +383,7 @@ export default class Stage {
               col.obstacleMesh.dispose();
               if (_.sample([0,0,0,0,1]) === 1) {
                 this.spawnTreasure(new Babylon.Vector3(
-                  this.spaceBetweenStages + this.tileSize*(mx+x) + (this.tileSize/2), 
+                  this.tileSize*(mx+x) + (this.tileSize/2),
                   10,
                   this.spaceBetweenStages + this.tileSize*(my+y) + (this.tileSize/2)));
               }
@@ -327,12 +398,30 @@ export default class Stage {
       });
     });
 
-    this.model.tiles[x][y].floor = 0;
-    this.model.tiles[x][y].floorMesh.dispose();
+    if(this.actors.length > 0) this.game.stage.buildNavigationMesh(this.game.scene);
+
+    //this.model.tiles[x][y].floor = 0;
+    //this.model.tiles[x][y].floorMesh.dispose();
   }
 
-  destroy() {
-    this.group.dispose();
+  remove() {
+    this.game.scene.onBeforeRenderObservable.remove(this.render);
+
+    _.forEach(this.model.tiles, (row) => {
+      _.forEach(row, (col) => {
+        if (col.tileMesh) col.tileMesh.dispose();
+        if (col.obstacleMesh) col.obstacleMesh.dispose();
+        if (col.rotorBaseMesh) col.rotorBaseMesh.dispose();
+        if (col.rotorFanMesh) col.rotorFanMesh.dispose();
+      });
+    });
+
+    _.forEach(this.actors, (actor) => {
+      actor.remove()
+    })
+
+    this.model.group.dispose();
+    if(this.navMesh) this.navMesh.dispose();
     delete this;
   }
 }

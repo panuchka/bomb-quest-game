@@ -10,7 +10,7 @@ export default class StageManager {
     this.stages = [];
     this.currentStage = null;
     this.tileSize = game.loadedAssets['Tile_Floor'].getBoundingInfo().boundingBox.extendSize.x * 2;
-    this.spaceBetweenStages = 2000;
+    this.spaceBetweenStages = 3000;
     this.currentStageIndex = 0;
   }
 
@@ -38,16 +38,6 @@ export default class StageManager {
   removeStage(index) {
     const stage = _.first(this.stages.splice(index, 1));
 
-    _.forEach(stage.model.tiles, (row) => {
-      _.forEach(row, (col) => {
-        if (col.tileMesh) col.tileMesh.dispose();
-        if (col.obstacleMesh) col.obstacleMesh.dispose();
-        if (col.rotorBaseMesh) col.rotorBaseMesh.dispose();
-        if (col.rotorFanMesh) col.rotorFanMesh.dispose();
-      });
-    });
-
-    stage.model.group.dispose();
-    stage.navMesh.dispose();
+    stage.remove()
   }
 }

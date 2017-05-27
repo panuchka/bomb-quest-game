@@ -11,7 +11,7 @@ export default class GameScene extends Scene {
   constructor(canvas, engine) {
     super(canvas, engine);
 
-    this.scene.debugLayer.show();
+    //this.scene.debugLayer.show();
 
     /* Gravity and collisions */
     this.scene.gravity = new Babylon.Vector3(0, -1, 0);
@@ -36,6 +36,27 @@ export default class GameScene extends Scene {
     new PreLoader(this)
      .loadAssets(this.meshes, this.textures)
      .onFinish(this.initScene, this);
+
+    /* Game state */
+    this.health = 100
+    this.scrap = 0
+    this.scrapGoal = _.sample([5, 10, 15])
+
+    this.state = this.scene.onBeforeRenderObservable.add(() => {
+      if (this.scrap >= this.scrapGoal) {
+        console.log('EPIC WIN')
+      }
+    })
+  }
+
+  changeStage() {
+    this.stage = this.stageManager.createStage()
+    this.stage.spawnActors()
+    this.stage.spawnPlayer()
+
+    this.directionalLight.position = this.player.body.position
+
+    this.stageManager.removeStage(0)
   }
 
   initScene() {
@@ -43,15 +64,12 @@ export default class GameScene extends Scene {
       this.stageManager = new StageManager(this);
       this.stage = _.sample([0,1])
         ? this.stageManager.createStage('basic-1')
-        : this.stageManager.createStage();
+        : this.stageManager.createStage('basic-1');
       this.stage.spawnActors();
 
       /* Init player */
       this.player = new Player(this);
-      this.player.body.position = new Babylon.Vector3(
-        (this.stage.model.start.x * this.stage.tileSize) - this.stage.tileSize/2, 
-        0, 
-        (this.stage.model.start.y * this.stage.tileSize) - this.stage.tileSize/2);
+      this.stage.spawnPlayer()
     } 
     catch(e) {
       console.log(e);

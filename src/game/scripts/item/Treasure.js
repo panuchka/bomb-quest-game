@@ -30,6 +30,7 @@ export default class Treasure {
   find() {
     this.body.dispose();
     this.game.scene.onBeforeRenderObservable.remove(this.render);
+    this.game.scrap++
     delete this;
   }
 }

@@ -21,7 +21,7 @@ export default class Actor {
 	  var accumulator = 0;
 	  var last_tick = 0;
 
-    this.scene.registerBeforeRender(() => {
+    this.pathFinding = this.game.scene.onBeforeRenderObservable.add(() => {
       now = Date.now();
 		  dt = now - last;
 		  last = now;
@@ -32,13 +32,13 @@ export default class Actor {
         let path = this.stage.getPath(this.body.position, game.player.body.position, this.model);
         this.target(path);
 		  }
-    });
+    })
   }
 
   target(path) {
     if (path && path.length > 0) {
       let length = 0;
-      let direction = [{  
+      let direction = [{
         frame: 0,
         value: this.body.position
       }];
@@ -55,7 +55,7 @@ export default class Actor {
         direction[i].frame /= length;
       }
 
-      let moveActor = new Babylon.Animation("CameraMove", "position", 180/length+10, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, Babylon.Animation.ANIMATIONLOOPMODE_CONSTANT);
+      let moveActor = new Babylon.Animation("CameraMove", "position", 180/length+10, Babylon.Animation.ANIMATIONTYPE_VECTOR3, Babylon.Animation.ANIMATIONLOOPMODE_CONSTANT);
       moveActor.setKeys(direction);
       this.body.animations.push(moveActor);
 
@@ -69,6 +69,7 @@ export default class Actor {
   }
 
   remove() {
+    this.game.scene.onBeforeRenderObservable.remove(this.pathFinding);
     this.body.dispose();
     delete this;
   }

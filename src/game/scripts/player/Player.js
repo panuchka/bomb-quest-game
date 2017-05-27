@@ -7,9 +7,7 @@ export default class Player {
     this.game = game;
     this.body = game.loadedAssets['Entity_Robot'];
     this.body.setEnabled(true);
-    this.body.position.y = 0;
-    this.body.position.x = 40;
-    this.body.position.z = 100;
+    this.body.rotation.y = - Math.PI / 2
 
     const bounds = this.body.getBoundingInfo().boundingBox.extendSize;
     this.body.ellipsoid = new Babylon.Vector3(bounds.x / 2, bounds.x / 4, bounds.x / 2);
@@ -96,7 +94,7 @@ export default class Player {
     if (this.movementDirection[2] != 0) { this.nextSpeed.x = -velocity; }
     if (this.movementDirection[3] != 0) { this.nextSpeed.x = velocity; }
 
-    this.currentSpeed = Babylon.Vector3.Lerp(this.currentSpeed, this.nextSpeed, 0.2);
+    this.currentSpeed = Babylon.Vector3.Lerp(this.currentSpeed, this.nextSpeed, 0.15);
     this.body.moveWithCollisions(this.currentSpeed);
     this.rotate();
   }
